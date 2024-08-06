@@ -12,9 +12,7 @@ function render(state = store.home) {
       ${main(state)}
       ${footer()}
     `;
-  console.log("it's updating");
   router.updatePageLinks();
-  console.log("it's updated");
 }
 
 // add menu toggle to bars icon in nav bar
