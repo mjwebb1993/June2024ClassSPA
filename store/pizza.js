@@ -1,4 +1,5 @@
 export default {
   header: "List All Pizzas",
-  view: "pizza"
+  view: "pizza",
+  pizzas: []
 };
