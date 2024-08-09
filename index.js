@@ -1,8 +1,10 @@
-import { header, nav, main, footer } from "./components";
+import { header, nav, main, footer, spinner } from "./components";
 import * as store from "./store";
 import Navigo from "navigo";
 import { camelCase } from "lodash";
 import axios from "axios";
+import { addNavButtonEventHandler } from "./components/nav";
+import { showSpinner } from "./components/spinner";
 
 const router = new Navigo("/");
 
@@ -10,6 +12,7 @@ function render(state = store.home) {
   document.querySelector("#root").innerHTML = `
       ${header(state)}
       ${nav(store.nav)}
+      ${spinner(store.spinner)}
       ${main(state)}
       ${footer()}
     `;
@@ -21,6 +24,10 @@ router.hooks({
   // The `match` parameter is the data that is passed from Navigo to the before hook handler with details about the route being accessed.
   // https://github.com/krasimir/navigo/blob/master/DOCUMENTATION.md#match
   before: (done, match) => {
+    console.info("Before hook called");
+
+    showSpinner();
+
     // We need to know what view we are on to know what data to fetch
     const view = match?.data?.view ? camelCase(match.data.view) : "home";
     // Add a switch case statement to handle multiple routes
@@ -70,22 +77,24 @@ router.hooks({
     }
   },
   already: match => {
+    console.info("Already hook called");
+
     const view = match?.data?.view ? camelCase(match.data.view) : "home";
 
     render(store[view]);
 
     // add menu toggle to bars icon in nav bar
-    document.querySelector(".fa-bars").addEventListener("click", () => {
-      document.querySelector("nav > ul").classList.toggle("hidden--mobile");
-    });
+    addNavButtonEventHandler();
   },
   after: match => {
+    console.info("After hook called");
+
     router.updatePageLinks();
 
     // add menu toggle to bars icon in nav bar
-    document.querySelector(".fa-bars").addEventListener("click", () => {
-      document.querySelector("nav > ul").classList.toggle("hidden--mobile");
-    });
+    addNavButtonEventHandler();
+
+    showSpinner(false);
   }
 });
 
@@ -96,10 +105,14 @@ router
     // (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)
     // This reduces the number of checks that need to be performed
     ":view": match => {
+      console.info("view callback called");
+
       // Change the :view data element to camel case and remove any dashes (support for multi-word views)
       const view = match?.data?.view ? camelCase(match.data.view) : "home";
       // Determine if the view name key exists in the store object
       if (view in store) {
+        console.info('Render in view callback called');
+
         render(store[view]);
       } else {
         render(store.viewNotFound);
