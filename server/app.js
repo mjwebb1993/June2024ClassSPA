@@ -100,3 +100,5 @@ app.use("/pizzas", pizzas);
 // Tell the Express app to start listening
 // Let the humans know I am running and listening on 4040
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+
+export default app;
